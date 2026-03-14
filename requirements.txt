@@ -1,0 +1,17 @@
+<<<<<<< HEAD
+gevent==24.2.1
+Flask==3.0.3
+Flask-SocketIO==5.4.1
+Flask-CORS==5.0.0
+requests==2.32.3
+gunicorn==22.0.0
+=======
+Flask==3.0.3
+Flask-socketIO==5.3.6
+Flask-CORS==5.0.0
+requests==2.32.3
+gevent==24.11.0
+gunicorn==22.0.0
+eventlet==0.36.1
+Werkzeug==3.0.4
+>>>>>>> 26afe3bfea950dde80db981ac4a9927858bc3204
