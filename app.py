@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 
-
-=======
->>>>>>> 26afe3bfea950dde80db981ac4a9927858bc3204
 from gevent import monkey
 monkey.patch_all()
 
@@ -255,7 +251,7 @@ def cleanup_thread():
 threading.Thread(target=cleanup_thread, daemon=True).start()
 
 # CLIENT HTML (unchanged)
-<<<<<<< HEAD
+
 
 CLIENT_HTML = '''
 <!DOCTYPE html>
@@ -664,154 +660,6 @@ window.addEventListener('load', () => {
 window.addEventListener('pagehide', stopTracking);
 window.addEventListener('beforeunload', stopTracking);
 </script>
-=======
-CLIENT_HTML = '''
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPS Service</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh; display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-        }
-        .app-container {
-            background: rgba(255,255,255,0.12); backdrop-filter: blur(20px);
-            border-radius: 24px; padding: 35px; text-align: center; max-width: 340px;
-            width: 92%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.18);
-        }
-        .title { color: white; font-size: 26px; font-weight: 800; margin-bottom: 18px; }
-        .status { color: #e8f5e8; font-size: 15px; margin-bottom: 25px; opacity: 0.95; }
-        .control-btn { 
-            width: 110px; height: 110px; border-radius: 50%; border: none; 
-            font-size: 44px; cursor: pointer; transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            background: linear-gradient(45deg, #10b981, #34d399); color: white; 
-            box-shadow: 0 12px 40px rgba(16,185,129,0.4); margin-bottom: 20px;
-        }
-        .control-btn:hover { transform: scale(1.08); box-shadow: 0 20px 50px rgba(16,185,129,0.6); }
-        .control-btn.active { animation: pulse 1.8s infinite; background: linear-gradient(45deg, #059669, #10b981); }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        .service-info { background: rgba(0,0,0,0.25); padding: 15px; border-radius: 16px; color: #d1d5db; font-size: 13px; line-height: 1.5; }
-        .wave { display: flex; gap: 3px; justify-content: center; margin: 15px 0; }
-        .wave-bar { width: 4px; height: 25px; background: rgba(255,255,255,0.7); border-radius: 2px; animation: wave 1.2s infinite ease-in-out; }
-        .wave-bar:nth-child(2) { animation-delay: 0.1s; }
-        .wave-bar:nth-child(3) { animation-delay: 0.2s; }
-        .wave-bar:nth-child(4) { animation-delay: 0.3s; }
-        @keyframes wave { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1.1); } }
-    </style>
-</head>
-<body>
-    <div class="app-container">
-        <div class="title">GPS Service</div>
-        <div class="status" id="statusText">Enable GPS service</div>
-        <button class="control-btn" id="controlBtn">▶</button>
-        <div class="wave" id="wave" style="display:none;">
-            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
-        </div>
-        <div class="service-info" id="serviceInfo" style="display:none;">
-            ✅ High accuracy GPS active<br>🔗 Connected to service
-        </div>
-    </div>
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-    <script>
-        const socket = io({ transports: ['websocket'], timeout: 20000 });
-        let watchId = null;
-        let sessionId = "gps_" + crypto.randomUUID().slice(0, 12);
-        let reconnectAttempts = 0;
-        const MAX_RECONNECTS = 5;
-
-        const btn = document.getElementById("controlBtn");
-        const status = document.getElementById("statusText");
-        const wave = document.getElementById("wave");
-        const info = document.getElementById("serviceInfo");
-
-        socket.on('connect', () => {
-            console.log('✅ Connected:', socket.id);
-            reconnectAttempts = 0;
-        });
-
-        socket.on('disconnect', () => {
-            console.log('❌ Disconnected');
-            if (watchId) stopTracking();
-        });
-
-        socket.on('connect_error', (err) => {
-            console.log('Connection error:', err);
-            if (reconnectAttempts < MAX_RECONNECTS) {
-                reconnectAttempts++;
-                setTimeout(() => socket.connect(), 2000 * reconnectAttempts);
-            }
-        });
-
-        btn.onclick = toggleTracking;
-
-        async function toggleTracking() {
-            if (!watchId) {
-                startTracking();
-            } else {
-                stopTracking();
-            }
-        }
-
-        function startTracking() {
-            btn.classList.add('active');
-            btn.textContent = '⏸';
-            status.textContent = 'GPS service active';
-            wave.style.display = 'flex';
-            info.style.display = 'block';
-
-            navigator.geolocation.getCurrentPosition(
-                pos => {
-                    watchId = navigator.geolocation.watchPosition(
-                        sendPosition,
-                        err => console.error('GPS error:', err),
-                        { enableHighAccuracy: true, timeout: 5000, maximumAge: 2000 }
-                    );
-                },
-                err => {
-                    status.textContent = 'GPS unavailable';
-                    btn.classList.remove('active');
-                    btn.textContent = '▶';
-                },
-                { enableHighAccuracy: true, timeout: 10000 }
-            );
-        }
-
-        function sendPosition(position) {
-            const data = {
-                session: sessionId,
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-                accuracy: position.coords.accuracy,
-                speed: position.coords.speed || 0,
-                timestamp: Date.now()
-            };
-            socket.emit('gps_update', data);
-        }
-
-        function stopTracking() {
-            if (watchId) {
-                navigator.geolocation.clearWatch(watchId);
-                watchId = null;
-            }
-            btn.classList.remove('active');
-            btn.textContent = '▶';
-            status.textContent = 'Service paused';
-            wave.style.display = 'none';
-            info.style.display = 'none';
-        }
-
-        // Cleanup on page unload
-        window.addEventListener('pagehide', stopTracking);
-        window.addEventListener('beforeunload', stopTracking);
-    </script>
->>>>>>> 26afe3bfea950dde80db981ac4a9927858bc3204
 </body>
 </html>
 '''
@@ -841,13 +689,10 @@ ADMIN_HTML = '''
             margin-bottom: 10px;
         }
         .view-toggle:hover { background: rgba(0,255,136,0.15); transform: translateY(-2px); }
-<<<<<<< HEAD
-        .view-toggle.satellite::after { content: " "; }
-        .view-toggle.normal::after { content: " "; }
-=======
+
         .view-toggle.satellite::after { content: " 🛰️"; }
         .view-toggle.normal::after { content: " 🗺️"; }
->>>>>>> 26afe3bfea950dde80db981ac4a9927858bc3204
+
         .landmark-toggle { 
             background: rgba(12,12,26,0.95); backdrop-filter: blur(20px); 
             border: 2px solid rgba(255,0,0,0.4); border-radius: 50px; 
@@ -909,22 +754,13 @@ ADMIN_HTML = '''
         <div id="map">
             <div class="map-controls">
                 <div class="view-toggle satellite" id="viewToggle" onclick="toggleMapView()">Satellite</div>
-<<<<<<< HEAD
-                <div class="landmark-toggle" id="landmarkToggle" onclick="toggleLandmarks()">Critical Landmarks  OFF</div>
-=======
                 <div class="landmark-toggle" id="landmarkToggle" onclick="toggleLandmarks()">Critical Landmarks 🔴 OFF</div>
->>>>>>> 26afe3bfea950dde80db981ac4a9927858bc3204
             </div>
         </div>
         <div class="panel">
             <div class="tabs">
-<<<<<<< HEAD
-                <button class="tab-btn active" onclick="switchTab('live')"> Live Tracking</button>
-                <button class="tab-btn" onclick="switchTab('coords')"> Coordinates</button>
-=======
                 <button class="tab-btn active" onclick="switchTab('live')">📍 Live Tracking</button>
                 <button class="tab-btn" onclick="switchTab('coords')">📋 Coordinates</button>
->>>>>>> 26afe3bfea950dde80db981ac4a9927858bc3204
             </div>
             <div id="live-tab" class="tab-content active">
                 <div class="header">Live GPS Tracking</div>
@@ -1003,22 +839,14 @@ ADMIN_HTML = '''
         showLandmarks = !showLandmarks;
         
         if (showLandmarks) {
-<<<<<<< HEAD
-            toggleBtn.textContent = 'Critical Landmarks  ON';
-=======
             toggleBtn.textContent = 'Critical Landmarks 🔴 ON';
->>>>>>> 26afe3bfea950dde80db981ac4a9927858bc3204
             toggleBtn.classList.add('on');
             // Show all landmark markers
             landmarkMarkers.forEach(marker => {
                 if (marker) marker.addTo(map);
             });
         } else {
-<<<<<<< HEAD
-            toggleBtn.textContent = 'Critical Landmarks  OFF';
-=======
             toggleBtn.textContent = 'Critical Landmarks 🔴 OFF';
->>>>>>> 26afe3bfea950dde80db981ac4a9927858bc3204
             toggleBtn.classList.remove('on');
             // Hide all landmark markers
             landmarkMarkers.forEach(marker => {
@@ -1081,15 +909,9 @@ ADMIN_HTML = '''
                                     ${landmark.name}
                                 </div>
                                 <div style="color:#ff6b6b;font-size:14px;">
-<<<<<<< HEAD
-                                     Type: ${landmark.type}<br>
-                                     Distance: ~500m from GPS<br>
-                                     Session: ${data.session.slice(-10)}
-=======
                                     🏥 Type: ${landmark.type}<br>
                                     📍 Distance: ~500m from GPS<br>
                                     🆔 Session: ${data.session.slice(-10)}
->>>>>>> 26afe3bfea950dde80db981ac4a9927858bc3204
                                 </div>
                             </div>
                         `);
@@ -1104,11 +926,7 @@ ADMIN_HTML = '''
 
     function createUserPopup(data) {
         const landmarksHtml = data.nearby_landmarks && data.nearby_landmarks.length > 0 
-<<<<<<< HEAD
-            ? data.nearby_landmarks.slice(0, 5).map(l => ` ${l.name} (${l.type})`).join('<br>')
-=======
             ? data.nearby_landmarks.slice(0, 5).map(l => `📍 ${l.name} (${l.type})`).join('<br>')
->>>>>>> 26afe3bfea950dde80db981ac4a9927858bc3204
             : 'No landmarks nearby';
             
         return `<div style="min-width: 320px; font-family: monospace;">
@@ -1121,22 +939,13 @@ ADMIN_HTML = '''
             <div style="font-size: 14px; color: #00ff88; margin-bottom: 10px;">
                 ${data.lat.toFixed(7)} | ${data.lng.toFixed(7)}
             </div>
-            <div style="font-size: 12px; line-height: 1.4; margin-bottom: 10px;">
-<<<<<<< HEAD
-                 ${data.accuracy?.toFixed(0) || '?'}m |  ${(data.speed || 0).toFixed(1)}km/h<br>
-                 ${new Date(data.timestamp).toLocaleTimeString()}<br>
-                 ${data.session.slice(-10)}
-            </div>
             <div style="background: rgba(16,185,129,0.2); padding: 8px; border-radius: 6px; font-size: 11px;">
-                <b> Nearby Landmarks:</b><br>${landmarksHtml}
-=======
                 📏 ${data.accuracy?.toFixed(0) || '?'}m | 🚀 ${(data.speed || 0).toFixed(1)}km/h<br>
                 🕐 ${new Date(data.timestamp).toLocaleTimeString()}<br>
                 🆔 ${data.session.slice(-10)}
             </div>
             <div style="background: rgba(16,185,129,0.2); padding: 8px; border-radius: 6px; font-size: 11px;">
                 <b>🏪 Nearby Landmarks:</b><br>${landmarksHtml}
->>>>>>> 26afe3bfea950dde80db981ac4a9927858bc3204
             </div>
         </div>`;
     }
@@ -1182,21 +991,12 @@ ADMIN_HTML = '''
             return `<div class="item coord-item" onclick="showCoord('${c.id}')">
                 <div class="coord-preview">${c.lat.toFixed(8)}, ${c.lon.toFixed(8)}</div>
                 ${translation.error ? 
-<<<<<<< HEAD
-                    `<div class="coord-result error"> ${translation.error}</div>` :
-                    `<div class="coord-result">
-                         ${translation.street || 'N/A'}, ${translation.city || 'N/A'}<br>
-                         ${translation.country || 'N/A'} |  ${translation.postcode || 'N/A'}<br>
-                        ${landmarks.length > 0 ? 
-                            `<div class="landmarks"> ${landmarksPreview}${landmarks.length > 3 ? '...' : ''}</div>` : 
-=======
                     `<div class="coord-result error">❌ ${translation.error}</div>` :
                     `<div class="coord-result">
                         🏠 ${translation.street || 'N/A'}, ${translation.city || 'N/A'}<br>
                         🌍 ${translation.country || 'N/A'} | 📮 ${translation.postcode || 'N/A'}<br>
                         ${landmarks.length > 0 ? 
                             `<div class="landmarks">🏪 ${landmarksPreview}${landmarks.length > 3 ? '...' : ''}</div>` : 
->>>>>>> 26afe3bfea950dde80db981ac4a9927858bc3204
                             ''
                         }
                     </div>`
@@ -1224,19 +1024,11 @@ ADMIN_HTML = '''
                                className: '', iconSize: [22, 22], iconAnchor: [11, 11]})
             }).addTo(map).bindPopup(`
                 <div style="font-family:monospace; min-width: 300px;">
-<<<<<<< HEAD
-                    <b> ${coord.lat.toFixed(8)}, ${coord.lon.toFixed(8)}</b><br><br>
-                     ${coord.translation.street || 'N/A'}, ${coord.translation.city || 'N/A'}<br>
-                     ${coord.translation.country || 'N/A'} |  ${coord.translation.postcode || 'N/A'}<br><br>
-                    <b> Nearby Landmarks (${coord.translation.nearby_landmarks?.length || 0}):</b><br>
-                    ${coord.translation.nearby_landmarks?.slice(0, 8).map(l => ` ${l.name} (${l.type})`).join('<br>') || 'None'}
-=======
                     <b>📍 ${coord.lat.toFixed(8)}, ${coord.lon.toFixed(8)}</b><br><br>
                     🏠 ${coord.translation.street || 'N/A'}, ${coord.translation.city || 'N/A'}<br>
                     🌍 ${coord.translation.country || 'N/A'} | 📮 ${coord.translation.postcode || 'N/A'}<br><br>
                     <b>🏪 Nearby Landmarks (${coord.translation.nearby_landmarks?.length || 0}):</b><br>
                     ${coord.translation.nearby_landmarks?.slice(0, 8).map(l => `📍 ${l.name} (${l.type})`).join('<br>') || 'None'}
->>>>>>> 26afe3bfea950dde80db981ac4a9927858bc3204
                 </div>
             `).openPopup();
         }
