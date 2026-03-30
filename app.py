@@ -395,11 +395,27 @@ opacity:.8;
 .gps-active {
     background: rgba(255,0,0,0.2);
     color: #ff4444;
+    
+#bg{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background-size:cover;
+background-position:center;
+filter:blur(13px) brightness(0.6);
+transform:scale(1.2);
+z-index:-1;
+transition:1s;
+}
+
 }
 </style>
 </head>
 <body>
 <div class="gps-status" id="gpsStatus"></div>
+<div id="bg"></div>
 
 <div class="carousel">
 <div class="card left"
