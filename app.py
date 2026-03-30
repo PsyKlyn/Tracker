@@ -454,10 +454,10 @@ transition:1s;
 <div class="carousel">
 <div class="card left"
 data-music="/static/song1.mp3"
-data-title="Serjang"
-data-artist="Longbamon Ronghang"
+data-title="Falling"
+data-artist="Harry Styles"
 onclick="selectSong(0)">
-<img src="/static/img1.jpg" crossorigin="anonymous">
+<img src="/static/img1.jpeg" crossorigin="anonymous">
 </div>
 
 <div class="card center"
@@ -470,10 +470,10 @@ onclick="selectSong(1)">
 
 <div class="card right"
 data-music="/static/song3.mp3"
-data-title="Serjang"
-data-artist="Longbamon Ronghang"
+data-title="Everglow"
+data-artist="Coldplay"
 onclick="selectSong(2)">
-<img src="/static/img3.jpg" crossorigin="anonymous">
+<img src="/static/img3.jpeg" crossorigin="anonymous">
 </div>
 </div>
 
